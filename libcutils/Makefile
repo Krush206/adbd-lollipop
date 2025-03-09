@@ -55,6 +55,7 @@ endif
 
 ifneq ($(WINDOWS_HOST_ONLY),1)
     commonSources += \
+        properties.c \
         fs.c \
         multiuser.c \
         socket_inaddr_any_server.c \
@@ -76,7 +77,7 @@ endif
 LOCAL_MODULE := libcutils.a
 LOCAL_SRC_FILES := $(commonSources) $(commonHostSources) dlmalloc_stubs.c
 LOCAL_STATIC_LIBRARIES := liblog
-LOCAL_CFLAGS += $(hostSmpFlag)
+LOCAL_CFLAGS += $(hostSmpFlag) -DPROP_NAME_MAX=32 -DPROP_VALUE_MAX=92
 ifneq ($(HOST_OS),windows)
 LOCAL_CFLAGS += -Werror
 endif
@@ -88,7 +89,7 @@ include $(BUILD_HOST_STATIC_LIBRARY)
 all: $(LOCAL_MODULE)
 
 %.o: %.c
-	gcc $(LOCAL_CFLAGS) -c -I../include -DHAVE_PTHREADS -o $@ $<
+	arm-linux-gnueabihf-gcc $(LOCAL_CFLAGS) -c -I../include -DHAVE_PTHREADS -o $@ $<
 
 $(LOCAL_MODULE): $(OBJS)
 	ar rcs $@ $?
