@@ -20,7 +20,7 @@
 #ifndef _LIBS_CUTILS_UIO_H
 #define _LIBS_CUTILS_UIO_H
 
-#ifdef HAVE_SYS_UIO_H
+#ifndef _WIN32
 #include <sys/uio.h>
 #else
 
