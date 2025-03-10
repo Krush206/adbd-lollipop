@@ -47,7 +47,7 @@ all: $(LOCAL_MODULE)
 	arm-linux-gnueabihf-gcc $(LOCAL_CFLAGS) -c -I../include -I. -o $@ $<
 
 $(LOCAL_MODULE): $(OBJS)
-	arm-linux-gnueabihf-gcc -static -o adbd -L../libcutils -L../liblog -L../libmincrypt $^ -lcutils -llog -lmincrypt -lresolv
+	arm-linux-gnueabihf-gcc -static -o $(LOCAL_MODULE) -L../libcutils -L../liblog -L../libmincrypt $^ -lcutils -llog -lmincrypt -lresolv
 
 clean:
 	rm -f $(LOCAL_MODULE) *.o
