@@ -67,7 +67,7 @@ void restart_root_service(int fd, void *cookie)
         writex(fd, buf, strlen(buf));
         adb_close(fd);
     } else {
-        property_get("ro.debuggable", value, "");
+        property_get("ro.debuggable", value, "1");
         if (strcmp(value, "1") != 0) {
             snprintf(buf, sizeof(buf), "adbd cannot run as root in production builds\n");
             writex(fd, buf, strlen(buf));
@@ -85,19 +85,8 @@ void restart_root_service(int fd, void *cookie)
 void restart_tcp_service(int fd, void *cookie)
 {
     char buf[100];
-    char value[PROPERTY_VALUE_MAX];
-    int port = (int) (uintptr_t) cookie;
 
-    if (port <= 0) {
-        snprintf(buf, sizeof(buf), "invalid port\n");
-        writex(fd, buf, strlen(buf));
-        adb_close(fd);
-        return;
-    }
-
-    snprintf(value, sizeof(value), "%d", port);
-    property_set("service.adb.tcp.port", value);
-    snprintf(buf, sizeof(buf), "restarting in TCP mode port: %d\n", port);
+    snprintf(buf, sizeof(buf), "already in USB/TCP mode, but restarting anyway\n");
     writex(fd, buf, strlen(buf));
     adb_close(fd);
 }
@@ -106,8 +95,7 @@ void restart_usb_service(int fd, void *cookie)
 {
     char buf[100];
 
-    property_set("service.adb.tcp.port", "0");
-    snprintf(buf, sizeof(buf), "restarting in USB mode\n");
+    snprintf(buf, sizeof(buf), "already in USB/TCP mode, but restarting anyway\n");
     writex(fd, buf, strlen(buf));
     adb_close(fd);
 }

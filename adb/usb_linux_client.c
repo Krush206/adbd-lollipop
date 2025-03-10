@@ -34,8 +34,8 @@
 #define MAX_PACKET_SIZE_FS	64
 #define MAX_PACKET_SIZE_HS	512
 
-#define cpu_to_le16(x)  htole16(x)
-#define cpu_to_le32(x)  htole32(x)
+#define cpu_to_le16(x)  (x)
+#define cpu_to_le32(x)  (x)
 
 struct usb_handle
 {

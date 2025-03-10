@@ -189,7 +189,7 @@ static void *server_socket_thread(void * arg)
 }
 
 /* This is relevant only for ADB daemon running inside the emulator. */
-#if !ADB_HOST
+#if 0
 /*
  * Redefine open and write for qemu_pipe.h that contains inlined references
  * to those routines. We will redifine them back after qemu_pipe.h inclusion.
@@ -297,6 +297,11 @@ static const char _ok_resp[]    = "ok";
     D("transport: qemu_socket_thread() exiting\n");
     return 0;
 }
+#else
+static void *qemu_socket_thread(void * arg)
+{
+    return NULL;
+}
 #endif  // !ADB_HOST
 
 void local_init(int port)
@@ -313,7 +318,7 @@ void local_init(int port)
         /* For the adbd daemon in the system image we need to distinguish
          * between the device, and the emulator. */
         char is_qemu[PROPERTY_VALUE_MAX];
-        property_get("ro.kernel.qemu", is_qemu, "");
+        property_get("ro.kernel.qemu", is_qemu, "0");
         if (!strcmp(is_qemu, "1")) {
             /* Running inside the emulator: use QEMUD pipe as the transport. */
             func = qemu_socket_thread;

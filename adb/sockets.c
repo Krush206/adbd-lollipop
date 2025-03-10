@@ -452,7 +452,7 @@ asocket *create_local_service_socket(const char *name)
 
 #if !ADB_HOST
     if (!strncmp(name, "root:", 5))
-        property_get("ro.debuggable", debug, "");
+        property_get("ro.debuggable", debug, "1");
 
     if ((!strncmp(name, "root:", 5) && getuid() != 0
         && strcmp(debug, "1") == 0)

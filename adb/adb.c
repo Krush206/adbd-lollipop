@@ -36,7 +36,6 @@
 #if !ADB_HOST
 #include <cutils/properties.h>
 #include <private/android_filesystem_config.h>
-#include <sys/capability.h>
 #include <sys/mount.h>
 #include <sys/prctl.h>
 #include <getopt.h>
@@ -147,7 +146,7 @@ void  adb_trace_init(void)
     }
 }
 
-#if !ADB_HOST
+#if 0
 /*
  * Implements ADB tracing inside the emulator.
  */
@@ -197,6 +196,16 @@ void adb_qemu_trace(const char* fmt, ...)
         vsnprintf(msg, sizeof(msg), fmt, args);
         adb_write(adb_debug_qemu, msg, strlen(msg));
     }
+}
+#else
+static int adb_qemu_trace_init(void)
+{
+    return 0;
+}
+
+void adb_qemu_trace(const char* fmt, ...)
+{
+    ;
 }
 #endif  /* !ADB_HOST */
 
@@ -308,7 +317,7 @@ static size_t fill_connect_data(char *buf, size_t bufsize)
     buf += len;
     for (i = 0; i < num_cnxn_props; i++) {
         char value[PROPERTY_VALUE_MAX];
-        property_get(cnxn_props[i], value, "");
+        property_get(cnxn_props[i], value, "ADB non-Android");
         len = snprintf(buf, remaining, "%s=%s;", cnxn_props[i], value);
         remaining -= len;
         buf += len;
@@ -1009,7 +1018,7 @@ void start_device_log(void)
 
     // read the trace mask from persistent property persist.adb.trace_mask
     // give up if the property is not set or cannot be parsed
-    property_get("persist.adb.trace_mask", value, "");
+    property_get("persist.adb.trace_mask", value, "0");
     if (sscanf(value, "%x", &adb_trace_mask) != 1)
         return;
 
@@ -1238,7 +1247,7 @@ void build_local_name(char* target_str, size_t target_size, int server_port)
 static void drop_capabilities_bounding_set_if_needed() {
 #ifdef ALLOW_ADBD_ROOT
     char value[PROPERTY_VALUE_MAX];
-    property_get("ro.debuggable", value, "");
+    property_get("ro.debuggable", value, "1");
     if (strcmp(value, "1") == 0) {
         return;
     }
@@ -1270,18 +1279,18 @@ static int should_drop_privileges() {
    /* run adbd in secure mode if ro.secure is set and
     ** we are not in the emulator
     */
-    property_get("ro.kernel.qemu", value, "");
+    property_get("ro.kernel.qemu", value, "0");
     if (strcmp(value, "1") != 0) {
-        property_get("ro.secure", value, "1");
+        property_get("ro.secure", value, "0");
         if (strcmp(value, "1") == 0) {
             // don't run as root if ro.secure is set...
             secure = 1;
 
             // ... except we allow running as root in userdebug builds if the
             // service.adb.root property has been set by the "adb root" command
-            property_get("ro.debuggable", value, "");
+            property_get("ro.debuggable", value, "1");
             if (strcmp(value, "1") == 0) {
-                property_get("service.adb.root", value, "");
+                property_get("service.adb.root", value, "1");
                 if (strcmp(value, "1") == 0) {
                     secure = 0;
                 }
@@ -1378,12 +1387,6 @@ int adb_main(int is_daemon, int server_port)
         D("Local port disabled\n");
     } else {
         char local_name[30];
-        if ((root_seclabel != NULL) && (is_selinux_enabled() > 0)) {
-            // b/12587913: fix setcon to allow const pointers
-            if (setcon((char *)root_seclabel) < 0) {
-                exit(1);
-            }
-        }
         build_local_name(local_name, sizeof(local_name), server_port);
         if(install_listener(local_name, "*smartsocket*", NULL, 0)) {
             exit(1);
@@ -1400,9 +1403,9 @@ int adb_main(int is_daemon, int server_port)
     // If one of these properties is set, also listen on that port
     // If one of the properties isn't set and we couldn't listen on usb,
     // listen on the default port.
-    property_get("service.adb.tcp.port", value, "");
+    property_get("service.adb.tcp.port", value, "5555");
     if (!value[0]) {
-        property_get("persist.adb.tcp.port", value, "");
+        property_get("persist.adb.tcp.port", value, "5555");
     }
     if (sscanf(value, "%d", &port) == 1 && port > 0) {
         printf("using port=%d\n", port);
