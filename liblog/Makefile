@@ -57,7 +57,7 @@ endif
 # ========================================================
 LOCAL_MODULE := liblog
 LOCAL_SRC_FILES := $(liblog_host_sources)
-LOCAL_CFLAGS := -DFAKE_LOG_DEVICE=1 -Werror
+LOCAL_CFLAGS := -DHAVE_PTHREADS -DFAKE_LOG_DEVICE=1 -Werror
 LOCAL_MULTILIB := both
 include $(BUILD_HOST_STATIC_LIBRARY)
 
@@ -74,7 +74,7 @@ include $(BUILD_HOST_SHARED_LIBRARY)
 all: $(LOCAL_MODULE)
 
 %.o: %.c
-	arm-linux-gnueabihf-gcc $(LOCAL_CFLAGS) -c -I../include -DHAVE_PTHREADS -o $@ $<
+	arm-linux-gnueabihf-gcc $(LOCAL_CFLAGS) -c -I../include -o $@ $<
 
 $(LOCAL_MODULE): $(OBJS)
 	ar rcs $@ $?

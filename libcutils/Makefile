@@ -77,7 +77,7 @@ endif
 LOCAL_MODULE := libcutils.a
 LOCAL_SRC_FILES := $(commonSources) $(commonHostSources) dlmalloc_stubs.c
 LOCAL_STATIC_LIBRARIES := liblog
-LOCAL_CFLAGS += $(hostSmpFlag) -DPROP_NAME_MAX=32 -DPROP_VALUE_MAX=92
+LOCAL_CFLAGS += $(hostSmpFlag) -DHAVE_PTHREADS -DPROP_NAME_MAX=32 -DPROP_VALUE_MAX=92
 ifneq ($(HOST_OS),windows)
 LOCAL_CFLAGS += -Werror
 endif
@@ -89,7 +89,7 @@ include $(BUILD_HOST_STATIC_LIBRARY)
 all: $(LOCAL_MODULE)
 
 %.o: %.c
-	arm-linux-gnueabihf-gcc $(LOCAL_CFLAGS) -c -I../include -DHAVE_PTHREADS -o $@ $<
+	arm-linux-gnueabihf-gcc $(LOCAL_CFLAGS) -c -I../include -o $@ $<
 
 $(LOCAL_MODULE): $(OBJS)
 	ar rcs $@ $?
